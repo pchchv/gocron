@@ -1,0 +1,9 @@
+{
+    "Tasks": [
+        {
+            "Period": 17,
+            "Command": "wget -O- https://google.com",
+            "Output": "./logs.txt"
+        }
+    ]
+}

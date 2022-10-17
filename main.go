@@ -1,14 +1,41 @@
 package main
 
 import (
+	"encoding/json"
+	"io/ioutil"
 	"log"
 	"os"
 	"os/exec"
 	"strconv"
 	"time"
+
+	"github.com/pchchv/gocron/timechecker"
+	"github.com/pchchv/gocron/types"
 )
 
-func main() {}
+func main() {
+	for {
+		file, err := os.Open("cronjob.json")
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer file.Close()
+		b, _ := ioutil.ReadAll(file)
+		file.Close()
+		var taskArray types.TaskArray
+		errJson := json.Unmarshal(b, &taskArray)
+		if errJson != nil {
+			log.Println("error:", errJson)
+		}
+		for _, element := range taskArray.Tasks {
+			if timechecker.NeedToRunNow(element) {
+				log.Println(time.Now())
+				go runCommand(element.Command, element.Output)
+			}
+		}
+		time.Sleep(time.Millisecond * 1000)
+	}
+}
 
 func runCommand(command string, output string) {
 	cmd := command + " >> " + output
